@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard",
+    ":disableRateLimiting",
+    "github>zaggash/gh-workflows//renovate-config/pr-labels",
+    "github>zaggash/gh-workflows//renovate-config/semantic-commits",
+    "github>zaggash/gh-workflows//renovate-config/datasources-config",
+    "github>zaggash/gh-workflows//renovate-config/automerge-docker-digests"
+  ],
+  "platform": "github",
+  "onboarding": false,
+  "enabled": true,
+  "requireConfig": "optional",
+  "timezone": "Europe/Paris",
+  "dependencyDashboardTitle": "Renovate Dashboard :robot: ",
+  "suppressNotifications": ["prIgnoreNotification"],
+  "commitBodyTable": true,
+  "rebaseWhen": "conflicted"
+}
