@@ -4,9 +4,9 @@
     "config:base",
     ":dependencyDashboard",
     ":disableRateLimiting",
+    ":separatePatchReleases",
     "github>zaggash/gh-workflows//renovate-config/pr-labels",
     "github>zaggash/gh-workflows//renovate-config/semantic-commits",
-    "github>zaggash/gh-workflows//renovate-config/datasources-config",
     "github>zaggash/gh-workflows//renovate-config/automerge-docker-digests"
   ],
   "platform": "github",
