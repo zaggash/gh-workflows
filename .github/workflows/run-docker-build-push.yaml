@@ -1,0 +1,133 @@
+name: Publish Docker image
+
+on:
+  workflow_call:
+    inputs:
+      dockerhub-account:
+        description: "Dockerhub registry user/org namespace"
+        default: ""
+        required: true
+        type: string
+      github-account:
+        description: "Github registry user/org namespace"
+        default: ""
+        required: true
+        type: string
+      image-name:
+        description: "Container image name"
+        default: ${{ github.repository }}
+        required: false
+        type: string
+      context:
+        description: "Path for build context"
+        default: "./"
+        required: false
+        type: string
+      dockerfile:
+        description: "Path to the Dockerfile"
+        default: "./Dockerfile"
+        required: false
+        type: string
+    secrets:
+      docker_username:
+        description: "Dockerhub username"
+        required: true
+      docker_password:
+        description: "Dockerhub password"
+        required: true
+      gh_username:
+        description: "Github username"
+        required: true
+      gh_token:
+        description: "Github registry access token"
+        required: true
+
+jobs:
+  push_to_registries:
+    name: Push Docker image to multiple registries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Log in to Docker Hub
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.docker_username }}
+          password: ${{ secrets.docker_password }}
+      
+      - name: Log in to the GitHub Container registry
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.gh_username }}
+          password: ${{ secrets.gh_token }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            docker.io/${{ inputs.dockerhub-account }}/${{ inputs.image-name }}
+            ghcr.io/${{ inputs.github-account }}/${{ inputs.image-name }}
+          tags: |
+            # set latest tag for push on default branch
+            type=raw,value=edge,enable={{is_default_branch}}
+            # On github tags event, set differant tags
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Update DockerHub repo description
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.docker_username }}
+          password: ${{ secrets.docker_password }}
+          repository: ${{ inputs.github-account }}/${{ inputs.image-name }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+
+  update_latest_images:
+    name: Update images on Renovate commit
+    # Only run on a push from the Application Bot
+    if: ${{ github.event_name == 'push' && github.actor_id == '121982232' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.app_id }}
+          private_key: ${{ secrets.app_private_key }}
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Get latest current tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        with:
+          semver_only: true
+          with_initial_version: true
+
+      - name: Update latest tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ steps.get-latest-tag.outputs.tag }}
+          force_push_tag: true
+          github_token: "${{ steps.generate-token.outputs.token }}"
