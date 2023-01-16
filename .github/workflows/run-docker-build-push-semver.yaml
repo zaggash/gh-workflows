@@ -29,12 +29,6 @@ on:
         required: false
         type: string
     secrets:
-      app_id:
-        description: "App ID of the application used to generate a token"
-        required: true
-      app_private_key:
-        description: "Private key of the application used to generate a token"
-        required: true
       docker_username:
         description: "Dockerhub username"
         required: true
@@ -49,12 +43,45 @@ on:
         required: true
 
 jobs:
-  push_to_registries:
+  build_images:
     name: Push Docker image to multiple registries
     runs-on: ubuntu-latest
+    env:
+      # Only update images on a push from the Application Bot
+      UPDATE: ${{ github.event_name == 'push' && github.actor_id == '121982232' }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+
+      - name: (Base Image Update) Save latest github tag
+        if: env.UPDATE == 'true'
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        with:
+          semver_only: true
+          with_initial_version: true
+          initial_version: "0.0.0"
+      - name: (Base Image Update) Parse latest github tag
+        if: env.UPDATE == 'true'
+        id: parse-latest-tag
+        uses: booxmedialtd/ws-action-parse-semver@v1
+        with:
+          input_string: ${{ steps.get-latest-tag.outputs.tag }}
+      - name: (Base Image Update) Save latest image digest
+        if: env.UPDATE == 'true'
+        id: get-latest-digest
+        run: |
+          image=$(awk '$1 == "FROM" { print $2 }' ${{ inputs.dockerfile }})
+          echo "latest_image_digest=${image}" >> $GITHUB_OUTPUT
+      - name: (Base Image Update) Checkout the latest pushed tag
+        if: env.UPDATE == 'true'
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.get-latest-tag.outputs.tag }}
+      - name: (Base Image Update) Replace image with latest digest
+        if: env.UPDATE == 'true'
+        run: |
+          sed -i "s/^FROM .*$/FROM ${{ steps.get-latest-digest.outputs.latest_image_digest }}/g" ${{ inputs.dockerfile }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -84,12 +111,15 @@ jobs:
           tags: |
             # set latest tag for push on default branch
             type=raw,value=edge,enable={{is_default_branch}}
+            type=raw,value=${{ steps.parse-latest-tag.outputs.major }},enable=${{env.UPDATE}}
+            type=raw,value=${{ steps.parse-latest-tag.outputs.major }}.${{ steps.parse-latest-tag.outputs.minor }},enable=${{env.UPDATE}}
+            type=raw,value=${{ steps.parse-latest-tag.outputs.major }}.${{ steps.parse-latest-tag.outputs.minor }}.${{ steps.parse-latest-tag.outputs.patch }},enable=${{env.UPDATE && steps.parse-latest-tag.outputs.major != 0 }}
             # On github tags event, set differant tags
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
           flavor: |
-            latest=${{ startsWith(github.ref, 'refs/tags/v') }}
+            latest=${{ startsWith(github.ref, 'refs/tags/v') || env.UPDATE }}
 
       - name: Update DockerHub repo description
         if: ${{ github.event_name != 'pull_request' }}
@@ -107,43 +137,4 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-
-  update_latest_images:
-    name: Update images on Renovate commit
-    # Only run on a push from the Application Bot
-    if: ${{ github.event_name == 'push' && github.actor_id == '121982232' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate Token
-        uses: tibdex/github-app-token@v1
-        id: generate-token
-        with:
-          app_id: ${{ secrets.app_id }}
-          private_key: ${{ secrets.app_private_key }}
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Save latest current tag
-        uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
-        with:
-          semver_only: true
-          with_initial_version: true
-
-      - name: Delete saved tag locally
-        run: git tag -d ${{ steps.get-latest-tag.outputs.tag }}
-
-      - name: Delete remote saved tag
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
-        with:
-          tag_name: ${{ steps.get-latest-tag.outputs.tag }}
-        env:
-          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
-
-      - name: Recreate latest saved tag
-        uses: rickstaa/action-create-tag@v1
-        with:
-          tag: ${{ steps.get-latest-tag.outputs.tag }}
-          github_token: "${{ steps.generate-token.outputs.token }}"
 
