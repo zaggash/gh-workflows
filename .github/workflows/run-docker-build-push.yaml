@@ -29,6 +29,12 @@ on:
         required: false
         type: string
     secrets:
+      app_id:
+        description: "App ID of the application used to generate a token"
+        required: true
+      app_private_key:
+        description: "Private key of the application used to generate a token"
+        required: true
       docker_username:
         description: "Dockerhub username"
         required: true
@@ -118,16 +124,26 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Get latest current tag
+      - name: Save latest current tag
         uses: actions-ecosystem/action-get-latest-tag@v1
         id: get-latest-tag
         with:
           semver_only: true
           with_initial_version: true
 
-      - name: Update latest tag
+      - name: Delete saved tag locally
+        run: git tag -d ${{ steps.get-latest-tag.outputs.tag }}
+
+      - name: Delete remote saved tag
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          tag_name: ${{ steps.get-latest-tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
+
+      - name: Recreate latest saved tag
         uses: rickstaa/action-create-tag@v1
         with:
           tag: ${{ steps.get-latest-tag.outputs.tag }}
-          force_push_tag: true
           github_token: "${{ steps.generate-token.outputs.token }}"
+
