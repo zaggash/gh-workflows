@@ -41,8 +41,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          token: "${{ steps.generate-token.outputs.token }}"
 
       - name: Renovate
         uses: renovatebot/github-action@v34.104.0
