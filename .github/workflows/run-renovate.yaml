@@ -16,7 +16,7 @@ on:
         type: string
       configurationFile:
         description: "Renovate configuration file"
-        default: ".github/renovateBot.json5"
+        default: ".github/renovate-bot.json5"
         required: false
         type: string
     secrets:

@@ -12,7 +12,7 @@
   "platform": "github",
   "onboarding": false,
   "enabled": true,
-  "requireConfig": "optional",
+  "requireConfig": "ignored",
   "timezone": "Europe/Paris",
   "dependencyDashboardTitle": "Renovate Dashboard :robot: ",
   "suppressNotifications": ["prIgnoreNotification"],
