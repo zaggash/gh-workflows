@@ -42,6 +42,8 @@ jobs:
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@main
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
 
       - name: Update Flux components
         id: update
