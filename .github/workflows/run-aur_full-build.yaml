@@ -142,6 +142,10 @@ jobs:
         with:
           app_id: ${{ secrets.app_id }}
           private_key: ${{ secrets.app_private_key }}
+      - name: "Get current date"
+        run: |
+          echo "builddate=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+        id: date
       - name: Create release and upload artifacts
         uses: ncipollo/release-action@v1
         with:
@@ -149,9 +153,9 @@ jobs:
           artifactErrorsFailBuild: true
           removeArtifacts: true
           allowUpdates: true
+          generateReleaseNotes: true
           tag: x86_64
-          name: x86_64
+          name: ${{ steps.date.outputs.builddate }}
           artifacts: "./*"
           body: |
             Archlinux x86_64 repo packages
-
