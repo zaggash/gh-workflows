@@ -1,0 +1,52 @@
+---
+name: Build Doc
+
+on:
+  workflow_call:
+    secrets:
+      app_id:
+        description: "App ID of the application used to generate a token"
+        required: true
+      app_private_key:
+        description: "Private key of the application used to generate a token"
+        required: true
+
+jobs:
+  build_deploy:
+    name: Build and Deploy Doc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.app_id }}
+          private_key: ${{ secrets.app_private_key }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+          token: ${{ steps.generate-token.outputs.token }}
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.110.0'
+          extended: true
+
+      - name: Build
+        run: | 
+          hugo --minify --source ./website --destination ./public
+      
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          github_token: ${{ steps.generate-token.outputs.token }}
+          publish_dir: ./website/public
+          publish_branch: gh-pages
+          user_name: 'zagg-bot[bot]'
+          user_email: '121982232+zagg-bot[bot]@users.noreply.github.com'
+
