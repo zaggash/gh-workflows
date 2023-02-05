@@ -39,7 +39,24 @@ jobs:
       - name: Build
         run: | 
           hugo --minify --source ./website --destination ./public
-      
+
+      - name: Link Checker
+        id: lychee
+        uses: lycheeverse/lychee-action@v1.5.4
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        with:
+          args: --verbose --no-progress './website/public/**/*.html'
+      - name: Create Issue From File
+        if: env.lychee_exit_code != 0
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: Link Checker Report
+          issue-number: 1
+          content-filepath: ./lychee/out.md
+          labels: report, automated issue
+          token: ${{ steps.generate-token.outputs.token }}
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/master' }}
