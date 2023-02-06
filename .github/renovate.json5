@@ -1,10 +1,21 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
   extends: [
     "github>zaggash/gh-workflows//renovate-config/default",
     "github>zaggash/gh-workflows//renovate-config/automerge-github-actions",
   ],
-  platform: "github",
-  username: "zagg-bot[bot]",
-  gitAuthor: "zagg-bot <121982232+zagg-bot[bot]@users.noreply.github.com>",
-  repositories: ["zaggash/gh-workflows"],
+
+  "regexManagers": [
+    {
+      "fileMatch": [".github/workflows/.+\\.ya?ml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "hugo-version: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)",
+        "VERSION: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
+      ],
+      "extractVersionTemplate": "^v?(?<version>.*)$"
+    }
+  ]
+
 }
