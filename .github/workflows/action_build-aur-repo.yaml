@@ -147,6 +147,22 @@ jobs:
           echo "builddate=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
         id: date
       - name: Create release and upload artifacts
+        id: upload-artifacts
+        continue-on-error: true
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          artifactErrorsFailBuild: true
+          removeArtifacts: true
+          allowUpdates: true
+          generateReleaseNotes: true
+          tag: x86_64
+          name: ${{ steps.date.outputs.builddate }}
+          artifacts: "./*"
+          body: |
+            Archlinux x86_64 repo packages
+      - name: Create release and upload artifacts - Retry
+        if: steps.upload-artifacts.outcome == 'failure'
         uses: ncipollo/release-action@v1
         with:
           token: "${{ steps.generate-token.outputs.token }}"
