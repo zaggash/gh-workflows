@@ -10,6 +10,9 @@ on:
       app_private_key:
         description: "Private key of the application used to generate a token"
         required: true
+      gist_token:
+        description: "User Token for custom badges creation"
+        required: true
       sf_url:
         description: "SFDC URL"
         required: true
@@ -95,4 +98,20 @@ jobs:
           content-filepath: ./lychee/out.md
           labels: report, automated issue
           token: ${{ steps.generate-token.outputs.token }}
+      
+      - name: Count the KB articles
+        run: |
+          echo "COUNT=$(find ./website/docs/kbs/* -type f | wc -l)" >> $GITHUB_ENV
+      - name: Create the Count Badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.gist_token }}
+          gistID: 627f5c8e17e8deb5326a692079b04625
+          filename: count-kbs.json
+          style: for-the-badge
+          namedLogo: Read the Docs
+          logoColor: white
+          label: KBs Number
+          message: ${{ env.COUNT }}
+          color: blue
 
