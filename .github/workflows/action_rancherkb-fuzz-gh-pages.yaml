@@ -10,6 +10,21 @@ on:
       app_private_key:
         description: "Private key of the application used to generate a token"
         required: true
+      sf_url:
+        description: "SFDC URL"
+        required: true
+      sf_user:
+        description: "SFDC User"
+        required: true
+      sf_pass:
+        description: "SFDC Pass"
+        required: true
+      sf_token:
+        description: "SFDC Token"
+        required: true
+      sf_ids_request:
+        description: "SFDC SOQL Request"
+        required: true
 
 jobs:
   build_deploy:
@@ -39,6 +54,12 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Scrap Website
+        env:
+          sfURL: ${{ secrets.sf_url }}
+          sfUser: ${{ secrets.sf_user }}
+          sfPass: ${{ secrets.sf_pass }}
+          sfToken: ${{ secrets.sf_token }}
+          sfIdsRequest: ${{ secrets.sf_ids_request }}
         run: go run main.go
 
       - name: Prepare Build env
