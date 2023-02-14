@@ -20,6 +20,9 @@ on:
         app_private_key:
           description: "Private key of the application used to generate a token"
           required: true
+        gist_token:
+          description: "User Token for custom badges creation"
+          required: true
         gpg_private_key:
           description: "Private key to sign packages and custom repo"
           required: true
@@ -175,3 +178,19 @@ jobs:
           artifacts: "./*"
           body: |
             Archlinux x86_64 repo packages
+
+      - name: Count the Arch Packages
+        run: |
+          echo "COUNT=$(find ./* -type f -name '*.pkg.tar.zst' | wc -l)" >> $GITHUB_ENV
+      - name: Create the Count Badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.gist_token }}
+          gistID: 627f5c8e17e8deb5326a692079b04625
+          filename: count-arch-packages.json
+          style: for-the-badge
+          namedLogo: Files
+          logoColor: white
+          label: Packages count
+          message: ${{ env.COUNT }}
+          color: blue
