@@ -50,9 +50,11 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: archlinux:base-devel
+    continue-on-error: true
     strategy:
       max-parallel: ${{ inputs.parallel-build }}
       matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+      fail-fast: false
 
     steps:
       - name: Install required binaries
