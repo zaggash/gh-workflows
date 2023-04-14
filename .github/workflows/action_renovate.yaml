@@ -14,6 +14,11 @@ on:
         default: "latest"
         required: false
         type: string
+      useSlim:
+        description: "Renovate Slim image"
+        default: false
+        required: false
+        type: boolean
       renovateLogLevel:
         description: "Log-Level"
         default: "debug"
@@ -51,10 +56,10 @@ jobs:
         uses: renovatebot/github-action@v36.0.2
         env:
           DRY_RUN: ${{ inputs.dryRun }}
-          RENOVATE_VERSION: ${{ inputs.renovateVersion}}
           LOG_LEVEL: ${{ inputs.renovateLogLevel }}
         with:
-          renovateVersion: ${{ inputs.renovateVersion }}
+          renovate-version: ${{ inputs.renovateVersion }}
+          useSlim: ${{ inputs.useSlim }}
           configurationFile: ${{ inputs.configurationFile }}
           token: "${{ steps.generate-token.outputs.token }}"
 
