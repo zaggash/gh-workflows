@@ -10,15 +10,10 @@ on:
         required: false
         type: string
       renovateVersion:
-        description: "Renovate Version tag"
+        description: "Renovate Version tag, 'latest' is a '-slim' version otherwise use 'full' or pinned version"
         default: "latest"
         required: false
         type: string
-      useSlim:
-        description: "Renovate Slim image"
-        default: false
-        required: false
-        type: boolean
       renovateLogLevel:
         description: "Log-Level"
         default: "debug"
@@ -59,7 +54,6 @@ jobs:
           LOG_LEVEL: ${{ inputs.renovateLogLevel }}
         with:
           renovate-version: ${{ inputs.renovateVersion }}
-          useSlim: ${{ inputs.useSlim }}
           configurationFile: ${{ inputs.configurationFile }}
           token: "${{ steps.generate-token.outputs.token }}"
 
