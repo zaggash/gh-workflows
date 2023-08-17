@@ -107,6 +107,10 @@ jobs:
              # * Build package
              sudo -u builder PKGDEST=${REPO_FOLDER} makepkg -f --sign
 
+      - name: Workaround '{upload/download}-artifact' limitation on name for epoch https://github.com/actions/upload-artifact/issues/22#issuecomment-568561966
+        run: |
+          rename ':' '!' "${REPO_FOLDER}/*.pkg.tar.*"
+
       - name: Save package
         uses: actions/upload-artifact@v3
         with:
@@ -125,6 +129,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: repo
+      - name: Workaround '{upload/download}-artifact' limitation on name for epoch https://github.com/actions/upload-artifact/issues/22#issuecomment-568561966
+        run: |
+          rename '!' ':' *.pkg.tar.*
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
