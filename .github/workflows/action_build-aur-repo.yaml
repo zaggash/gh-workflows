@@ -147,7 +147,7 @@ jobs:
           rename -- .tar.gz '' *.tar.gz
           rename -- .tar.gz.sig '.sig' *.tar.gz.sig
       - name: Generate Token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@v2
         id: generate-token
         with:
           app_id: ${{ secrets.app_id }}
