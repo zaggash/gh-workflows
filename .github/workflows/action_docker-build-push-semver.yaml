@@ -51,7 +51,7 @@ jobs:
       UPDATE: ${{ github.event_name == 'push' && github.actor_id == '121982232' }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: (Base Image Update) Save latest github tag
         if: env.UPDATE == 'true'
@@ -75,7 +75,7 @@ jobs:
           echo "latest_image_digest=${image}" >> $GITHUB_OUTPUT
       - name: (Base Image Update) Checkout the latest pushed tag
         if: env.UPDATE == 'true'
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           ref: ${{ steps.get-latest-tag.outputs.tag }}
       - name: (Base Image Update) Replace image with latest digest
