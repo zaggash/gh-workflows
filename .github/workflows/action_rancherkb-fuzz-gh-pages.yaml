@@ -103,7 +103,7 @@ jobs:
         run: |
           echo "COUNT=$(find ./website/docs/kbs/* -type f | wc -l)" >> $GITHUB_ENV
       - name: Create the Count Badge
-        uses: schneegans/dynamic-badges-action@v1.6.0
+        uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.gist_token }}
           gistID: 627f5c8e17e8deb5326a692079b04625
