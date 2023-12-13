@@ -38,7 +38,7 @@ jobs:
 
       - name: Build
         run: | 
-          hugo --minify --source ./website --destination ./public
+          hugo --minify --source ./website --destination ./public --noChmod
 
       - name: Link Checker
         id: lychee
