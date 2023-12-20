@@ -34,7 +34,7 @@ jobs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 
         with:
           submodules: true
       - name: Generate Matrix
@@ -65,7 +65,7 @@ jobs:
              # * Add required default packages
              pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 
         with:
           submodules: true
 
@@ -115,8 +115,8 @@ jobs:
       - name: Save package
         uses: actions/upload-artifact@v4
         with:
-          name: repo
-          path: repo/x86_64/
+          name: package-${{ matrix.package }}
+          path: ${{ env.REPO_FOLDER }}/
           retention-days: ${{ inputs.artifacts-retention }}
 
   build_repo:
@@ -129,7 +129,8 @@ jobs:
         id: restore
         uses: actions/download-artifact@v4
         with:
-          name: repo
+          pattern: package-*
+          merge-multiple: true
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
         with:
