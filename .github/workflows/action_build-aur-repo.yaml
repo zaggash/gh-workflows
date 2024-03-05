@@ -34,7 +34,7 @@ jobs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@b32f140b0c872d58512e0a66172253c302617b90 
+        uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0 
         with:
           submodules: true
       - name: Generate Matrix
@@ -65,7 +65,7 @@ jobs:
              # * Add required default packages
              pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg
       - name: Checkout
-        uses: actions/checkout@b32f140b0c872d58512e0a66172253c302617b90 
+        uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0 
         with:
           submodules: true
 
