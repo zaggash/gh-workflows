@@ -31,7 +31,7 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
 
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+        uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: '0.124.1' # renovate: datasource=github-tags depName=gohugoio/hugo
           extended: true
