@@ -4,6 +4,7 @@
     "config:base",
     ":dependencyDashboard",
     ":disableRateLimiting",
+    ":separateMultipleMajorReleases",
     ":separatePatchReleases",
     "github>zaggash/gh-workflows//renovate-config/pr-labels",
     "github>zaggash/gh-workflows//renovate-config/semantic-commits",
