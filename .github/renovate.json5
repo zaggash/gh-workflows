@@ -16,15 +16,13 @@
       "extractVersionTemplate": "^v?(?<version>.*)$"
     }
   ],
-
   "packageRules": [
     {
       "description": "Auto merge gohugo",
-      "matchDepNames": ["gohugoio/hugo"]
+      "matchDepNames": ["gohugoio/hugo"],
       "automerge": true,
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "ignoreTests": true
     }
   ]
-
 }
