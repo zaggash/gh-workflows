@@ -8,6 +8,15 @@
       "automergeType": "branch",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "ignoreTests": true
+    },
+    {
+      "description": "Auto merge github-releases from GH actions",
+      "matchDatasources": ["github-tags","github-releases"],
+      "matchPaths": [".github/workflows/**"],
+      "automerge": true,
+      "automergeType": "branch",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "ignoreTests": true
     }
   ]
 }
