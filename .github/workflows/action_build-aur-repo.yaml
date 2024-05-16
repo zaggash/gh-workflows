@@ -73,6 +73,8 @@ jobs:
         env:
           GPG_SIGNING_KEY: ${{ secrets.gpg_private_key }}
         run: |
+             # Edit makepkg.conf file : disable debug packages
+             sed -i 's#\(^OPTIONS.*\)\(debug\)\(.*\)#\1!\2\3#' /etc/makepkg.conf
              # * makepkg cannot (and should not) be run as root
              useradd -m builder
              # * Allow builder to run as root (to install packages/deps)
@@ -107,7 +109,7 @@ jobs:
              # * Build package
              sudo -u builder PKGDEST=${REPO_FOLDER} makepkg -f --sign
 
-      - name: Workaround '{upload/download}-artifact' limitation on name for epoch https://github.com/actions/upload-artifact/issues/22#issuecomment-568561966
+      - name: Workaround '{upload/download}-artifact' #limitation on name for epoch https://github.com/actions/upload-artifact/issues/22#issuecomment-568561966
         run: |
           # || [ "$?" = "4" ] // I do not want to exit if nothing was renamed
           rename ':' '.' ${REPO_FOLDER}/*.pkg.tar.* || [ "$?" == "4" ]
