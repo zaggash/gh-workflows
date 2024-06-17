@@ -130,7 +130,7 @@ jobs:
           repository: ${{ inputs.github-account }}/${{ inputs.image-name }}
 
       - name: Build and push Docker images
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
