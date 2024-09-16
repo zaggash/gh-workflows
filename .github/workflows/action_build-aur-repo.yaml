@@ -34,7 +34,7 @@ jobs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc 
+        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc
         with:
           submodules: true
       - name: Generate Matrix
@@ -65,7 +65,7 @@ jobs:
              # * Add required default packages
              pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg
       - name: Checkout
-        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc 
+        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc
         with:
           submodules: true
 
@@ -81,15 +81,17 @@ jobs:
              echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
              # * Setup GPG key for repo signing
              echo -n "$GPG_SIGNING_KEY" | base64 --decode | sudo -u builder gpg --import
-             # * Prepare folder repository folder 
+             # * Prepare folder repository folder
              mkdir -p ${REPO_FOLDER}
              chown -R builder:builder ./
 
       - name: Install yay
-        working-directory: ./yay-bin
+        working-directory: /tmp
         run: |
              # * Install yay to install dependencies hosted in the AUR.
-             sudo -u builder PKGDEST=${REPO_FOLDER} makepkg -si --noconfirm --needed
+             sudo -u builder git clone https://aur.archlinux.org/yay.git
+             cd yay/
+             sudo -u builder makepkg -si --noconfirm --needed
              sudo -u builder yay --version
 
       - name: Build ${{ matrix.package }}
