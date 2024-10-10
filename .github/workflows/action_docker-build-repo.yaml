@@ -1,0 +1,106 @@
+name: Publish Docker image
+
+on:
+  workflow_call:
+    inputs:
+      dockerhub-account:
+        description: "Dockerhub registry user/org namespace"
+        default: ""
+        required: false
+        type: string
+      github-account:
+        description: "Github registry user/org namespace"
+        default: ""
+        required: false
+        type: string
+      image-name:
+        description: "Container image name"
+        default: ${{ github.repository }}
+        required: false
+        type: string
+      context:
+        description: "Path for build context"
+        default: "./"
+        required: false
+        type: string
+      dockerfile:
+        description: "Path to the Dockerfile"
+        default: "./Dockerfile"
+        required: false
+        type: string
+      tag:
+        description: "Image tag to build"
+        default: "latest"
+        required: true
+        type: string
+    secrets:
+      docker_username:
+        description: "Dockerhub username"
+        required: false
+      docker_password:
+        description: "Dockerhub password"
+        required: false
+      gh_username:
+        description: "Github username"
+        required: false
+      gh_token:
+        description: "Github registry access token"
+        required: false
+
+jobs:
+  build_images:
+    name: Push Docker image to multiple registries
+    runs-on: ubuntu-latest
+    env:
+      # Only update images on a push from the Application Bot
+      UPDATE: ${{ github.event_name == 'push' && github.actor_id == '121982232' }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: ${{ (github.event_name != 'pull_request') && (inputs.dockerhub-account != '') }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.docker_username }}
+          password: ${{ secrets.docker_password }}
+
+      - name: Log in to the GitHub Container registry
+        if: ${{ (github.event_name != 'pull_request') && (inputs.github-account != '') }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.gh_username }}
+          password: ${{ secrets.gh_token }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            name=docker.io/${{ inputs.dockerhub-account }}/${{ inputs.image-name }},enable=${{inputs.dockerhub-account != ''}}
+            name=ghcr.io/${{ inputs.github-account }}/${{ inputs.image-name }},enable=${{inputs.github-account != ''}}
+          tags: |
+            type=raw,value=${{ inputs.tag }}
+          flavor: |
+            latest=auto
+
+      - name: Update DockerHub repo description
+        if: ${{ (github.event_name != 'pull_request') && (inputs.dockerhub-account != '') }}
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.docker_username }}
+          password: ${{ secrets.docker_password }}
+          repository: ${{ inputs.github-account }}/${{ inputs.image-name }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
