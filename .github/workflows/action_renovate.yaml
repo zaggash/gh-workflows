@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - name: Renovate
-        uses: renovatebot/github-action@v40.3.2
+        uses: renovatebot/github-action@v40.3.3
         env:
           DRY_RUN: ${{ inputs.dryRun }}
           LOG_LEVEL: ${{ inputs.renovateLogLevel }}
