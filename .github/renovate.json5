@@ -1,28 +1,35 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "github>zaggash/gh-workflows//renovate-config/default",
-],
-
-  "regexManagers": [
-    {
-      "fileMatch": [".github/workflows/.+\\.ya?ml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "hugo-version: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)",
-        "VERSION: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
-      ],
-      "extractVersionTemplate": "^v?(?<version>.*)$"
-    }
+    'github>zaggash/gh-workflows//renovate-config/default',
   ],
-  "packageRules": [
+  customManagers: [
     {
-      "description": "Auto merge gohugo",
-      "matchDepNames": ["gohugoio/hugo"],
-      "automerge": true,
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "ignoreTests": true
-    }
-  ]
+      customType: 'regex',
+      fileMatch: [
+        '.github/workflows/.+\\.ya?ml$',
+      ],
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        "hugo-version: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)",
+        "VERSION: '(?<currentValue>.*)' # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)",
+      ],
+      extractVersionTemplate: '^v?(?<version>.*)$',
+    },
+  ],
+  packageRules: [
+    {
+      description: 'Auto merge gohugo',
+      matchDepNames: [
+        'gohugoio/hugo',
+      ],
+      automerge: true,
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'digest',
+      ],
+      ignoreTests: true,
+    },
+  ],
 }
