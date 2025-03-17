@@ -72,7 +72,7 @@ jobs:
 
       - name: Install MKDocs & Plugins
         env:
-          VERSION: '9.6.8' # renovate: datasource=github-tags depName=squidfunk/mkdocs-material
+          VERSION: '9.6.9' # renovate: datasource=github-tags depName=squidfunk/mkdocs-material
         run: |
           pip install mkdocs-material==${VERSION}
           pip install mkdocs-awesome-pages-plugin
