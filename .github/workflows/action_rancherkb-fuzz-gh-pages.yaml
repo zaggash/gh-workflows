@@ -117,4 +117,9 @@ jobs:
           label: KBs Number
           message: ${{ env.COUNT }}
           color: blue
-
+      - name: Save KBs Markdown artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kbs
+          path: ./website/docs/kbs/
+          retention-days: 7
