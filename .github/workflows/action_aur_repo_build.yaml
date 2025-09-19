@@ -63,7 +63,7 @@ jobs:
              # * https://github.com/actions/runner/issues/2058
              echo "REPO_FOLDER=$GITHUB_WORKSPACE/repo/x86_64" >> $GITHUB_ENV
              # * Add required default packages
-             pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg
+             pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg jq
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
         with:
