@@ -58,7 +58,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Scrap Website
+      - name: Build KBs Markdown
         env:
           sfURL: ${{ secrets.sf_url }}
           sfUser: ${{ secrets.sf_user }}
