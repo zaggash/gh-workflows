@@ -91,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
           args: --verbose --no-progress --exclude-all-private './website/docs/**/*.md'
-          fail: false
+          fail: false  
       - name: Create Issue From File
         if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v5
@@ -117,9 +117,97 @@ jobs:
           label: KBs Number
           message: ${{ env.COUNT }}
           color: blue
+
       - name: Save KBs Markdown artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Kbs
           path: ./website/docs/kbs/
           retention-days: 7
+
+  ai_setup:
+    name: Create and Prepare AI Notebook
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    needs: build_deploy
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v2
+        id: generate-token
+        with:
+          app_id: ${{ secrets.app_id }}
+          private_key: ${{ secrets.app_private_key }}
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate-token.outputs.token }}
+      - name: Setup Git config
+        run: |
+          git config user.name 'zagg-bot[bot]'
+          git config user.email '121982232+zagg-bot[bot]@users.noreply.github.com'
+
+      - name: Download saved Kbs Artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./website/docs/kbs/
+          pattern: Kbs
+
+      - name: Prepare node env
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+      - run: |
+          apt update && apt install -y curl jq
+
+      - name: Prepare Source for NotebookLM                                                                                                                                                         
+        run: |
+          # Prepare KBs Markdown
+          python ./apps/md-merge-ai.py ./website/docs/kbs knowledge-base.md \
+            --context "This is a company knowledge base containing technical guides. It is supporting differant products like Rancher, Longhorn and RKE2." \
+            --prompt "You are a senior IT Engineer. Analyse the request and generate a plan to help to solve the problem. You need to give details to the answer and examples to debug the situation. Give the source and the command line to help the troubleshooting. Do not guess or make up answers. If the information is not available, let us know in your answer."
+            
+          #Prepare Longhorn Markdown
+          LONGHORN_LATEST=$(curl -sL https://api.github.com/repos/longhorn/longhorn/releases/latest | jq -r .tag_name | cut -c2-)
+          git clone --no-checkout https://github.com/longhorn/website.git longhorn_website
+          git -C longhorn_website sparse-checkout init --cone
+          git -C longhorn_website sparse-checkout set content/docs/${LONGHORN_LATEST}/
+          git -C longhorn_website checkout
+          python ./apps/md-merge-ai.py longhorn_website/content/docs/${LONGHORN_LATEST} longhorn-website.md
+            --context "this is the official Longhorn documentation. Longhorn is a cloud native distributed block storage system for Kubernetes."  \
+            --prompt ""
+
+          #Prepare RKE2 Markdown
+          git clone --no-checkout https://github.com/rancher/rke2-docs.git rke2_website
+          git -C rke2_website sparse-checkout init --cone
+          git -C rke2_website sparse-checkout set docs/
+          git -C rke2_website checkout
+          python ./apps/md-merge-ai.py rke2_website/docs rke2-website.md
+            --context ""This is the official RKE2 documentation. RKE2 is a Kubernetes distribution from Rancher."  \
+            --prompt ""
+
+          #Prepare Rancher Markdown
+          RANCHER_LATEST=$(curl -sL https://api.github.com/repos/rancher/rancher/releases/latest | jq -r .tag_name | cut -c2-)
+          git clone --no-checkout https://github.com/rancher/rancher-docs.git rancher_website
+          git -C rancher_website sparse-checkout init --cone
+          git -C rancher_website sparse-checkout set docs
+          git -C rancher_website checkout v${RANCHER_LATEST}
+          python ./apps/md-merge-ai.py rancher_website/docs rancher-website.md
+            --context "This is the official Rancher documentation. Rancher is a Kubernetes management platform."  \
+            --prompt ""
+
+      - name: Push Input Markdown
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: Update AI Notebook Input
+          commit_user_name: zagg-bot[bot]
+          commit_user_email: 121982232+zagg-bot[bot]@users.noreply.github.com
+          file_pattern: |
+            ./knowledge-base.md
+            ./*-website.md
+          branch: ai-notebook
+          token: ${{ steps.generate-token.outputs.token }}
+
+
