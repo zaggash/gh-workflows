@@ -143,6 +143,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
+          ref: ai-notebook
           token: ${{ steps.generate-token.outputs.token }}
       - name: Setup Git config
         run: |
@@ -160,7 +161,8 @@ jobs:
         with:
           python-version: 3.x
       - run: |
-          apt update && apt install -y curl jq
+          sudo apt-get update
+          sudo apt-get install -y curl jq
 
       - name: Prepare Source for NotebookLM                                                                                                                                                         
         run: |
@@ -175,7 +177,7 @@ jobs:
           git -C longhorn_website sparse-checkout init --cone
           git -C longhorn_website sparse-checkout set content/docs/${LONGHORN_LATEST}/
           git -C longhorn_website checkout
-          python ./apps/md-merge-ai.py longhorn_website/content/docs/${LONGHORN_LATEST} longhorn-website.md
+          python ./apps/md-merge-ai.py longhorn_website/content/docs/${LONGHORN_LATEST} longhorn-website.md \
             --context "this is the official Longhorn documentation. Longhorn is a cloud native distributed block storage system for Kubernetes."  \
             --prompt ""
 
@@ -184,8 +186,8 @@ jobs:
           git -C rke2_website sparse-checkout init --cone
           git -C rke2_website sparse-checkout set docs/
           git -C rke2_website checkout
-          python ./apps/md-merge-ai.py rke2_website/docs rke2-website.md
-            --context ""This is the official RKE2 documentation. RKE2 is a Kubernetes distribution from Rancher."  \
+          python ./apps/md-merge-ai.py rke2_website/docs rke2-website.md \
+            --context "This is the official RKE2 documentation. RKE2 is a Kubernetes distribution from Rancher."  \
             --prompt ""
 
           #Prepare Rancher Markdown
@@ -194,7 +196,7 @@ jobs:
           git -C rancher_website sparse-checkout init --cone
           git -C rancher_website sparse-checkout set docs
           git -C rancher_website checkout v${RANCHER_LATEST}
-          python ./apps/md-merge-ai.py rancher_website/docs rancher-website.md
+          python ./apps/md-merge-ai.py rancher_website/docs rancher-website.md \
             --context "This is the official Rancher documentation. Rancher is a Kubernetes management platform."  \
             --prompt ""
 
@@ -204,10 +206,6 @@ jobs:
           commit_message: Update AI Notebook Input
           commit_user_name: zagg-bot[bot]
           commit_user_email: 121982232+zagg-bot[bot]@users.noreply.github.com
-          file_pattern: |
-            ./knowledge-base.md
-            ./*-website.md
+          file_pattern: 'knowledge-base.md *-website.md'
           branch: ai-notebook
-          token: ${{ steps.generate-token.outputs.token }}
-
 
