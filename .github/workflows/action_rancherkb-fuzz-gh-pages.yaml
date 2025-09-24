@@ -200,6 +200,24 @@ jobs:
             --context "This is the official Rancher documentation. Rancher is a Kubernetes management platform."  \
             --prompt ""
 
+          #Prepare Fleet Markdown
+          git clone --no-checkout https://github.com/rancher/fleet-docs.git fleet_website
+          git -C fleet_website sparse-checkout init --cone
+          git -C fleet_website sparse-checkout set docs
+          git -C fleet_website checkout
+          python ./apps/md-merge-ai.py fleet_website/docs fleet-website.md \
+            --context "This is the official Fleet documentation. Fleet is a container management and deployment engine."  \
+            --prompt ""
+
+          #Prepare Elemental Markdown
+          git clone --no-checkout https://github.com/rancher/elemental-docs.git elemental_website
+          git -C elemental_website sparse-checkout init --cone
+          git -C elemental_website sparse-checkout set docs
+          git -C elemental_website checkout
+          python ./apps/md-merge-ai.py elemental_website/docs elemental-website.md \
+            --context "This is the official Elemental documentation. Elemental is a software stack enabling centralized, full cloud-native OS management with Kubernetes."  \
+            --prompt ""
+
       - name: Push Input Markdown
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
