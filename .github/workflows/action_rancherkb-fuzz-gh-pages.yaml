@@ -195,7 +195,7 @@ jobs:
           git clone --no-checkout https://github.com/rancher/rancher-docs.git rancher_website
           git -C rancher_website sparse-checkout init --cone
           git -C rancher_website sparse-checkout set docs
-          git -C rancher_website checkout v${RANCHER_LATEST}
+          git -C rancher_website checkout initial-snapshot-v${RANCHER_LATEST}
           python ./apps/md-merge-ai.py rancher_website/docs rancher-website.md \
             --context "This is the official Rancher documentation. Rancher is a Kubernetes management platform."  \
             --prompt ""
