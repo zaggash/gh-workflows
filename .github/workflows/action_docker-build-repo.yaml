@@ -90,7 +90,7 @@ jobs:
 
       - name: Update DockerHub repo description
         if: ${{ (github.event_name != 'pull_request') && (inputs.dockerhub-account != '') }}
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.docker_username }}
           password: ${{ secrets.docker_password }}
