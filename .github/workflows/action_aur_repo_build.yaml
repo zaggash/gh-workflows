@@ -32,16 +32,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
-        with:
-          submodules: true
+
       - name: Generate Matrix
         id: generate-matrix
         run: |
           sudo apt-get install jq
-          MATRIX_JSON=`find * -type f -name "PKGBUILD" -printf "%h\n" | jq -Rnc '."package" |= [inputs]'`
+          MATRIX_JSON=`find * -type d | jq -Rnc '."package" |= [inputs]'`
           echo ${MATRIX_JSON}
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
@@ -64,10 +64,20 @@ jobs:
              echo "REPO_FOLDER=$GITHUB_WORKSPACE/repo/x86_64" >> $GITHUB_ENV
              # * Add required default packages
              pacman -Syyu --noconfirm --needed --ignore filesystem git gnupg jq
+
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
-        with:
-          submodules: true
+      - name: Bypass DDOS, use Github
+        working-directory: ./${{ matrix.package }}
+        run: |
+             # Sync submodules from github to bypass AUR DDOS
+             # https://archlinux.org/news/recent-services-outages/
+
+             if ! [ -f PKGBUILD ]
+             then 
+               git clone --single-branch \
+                 --branch ${{ matrix.package }} https://github.com/archlinux/aur.git ./
+             fi
 
       - name: Setup environment
         env:
@@ -89,7 +99,9 @@ jobs:
         working-directory: /tmp
         run: |
              # * Install yay to install dependencies hosted in the AUR.
-             sudo -u builder git clone https://aur.archlinux.org/yay.git
+             sudo -u builder \
+               git clone --single-branch \
+                 --branch yay https://github.com/archlinux/aur.git yay
              cd yay/
              sudo -u builder makepkg -si --noconfirm --needed
              sudo -u builder yay --version
