@@ -219,7 +219,7 @@ jobs:
             --prompt ""
 
       - name: Push Input Markdown
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Update AI Notebook Input
           commit_user_name: zagg-bot[bot]
