@@ -151,7 +151,7 @@ jobs:
           git config user.email '121982232+zagg-bot[bot]@users.noreply.github.com'
 
       - name: Download saved Kbs Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ./website/docs/kbs/
           pattern: Kbs
