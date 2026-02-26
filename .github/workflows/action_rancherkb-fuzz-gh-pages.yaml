@@ -119,7 +119,7 @@ jobs:
           color: blue
 
       - name: Save KBs Markdown artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Kbs
           path: ./website/docs/kbs/
