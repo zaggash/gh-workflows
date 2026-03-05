@@ -78,7 +78,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: metadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             name=docker.io/${{ inputs.dockerhub-account }}/${{ inputs.image-name }},enable=${{inputs.dockerhub-account != ''}}
