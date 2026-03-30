@@ -74,7 +74,7 @@ jobs:
              # https://archlinux.org/news/recent-services-outages/
 
              if ! [ -f PKGBUILD ]
-             then 
+             then
                git clone --single-branch \
                  --branch ${{ matrix.package }} https://github.com/archlinux/aur.git ./
              fi
@@ -164,11 +164,11 @@ jobs:
           rename -- .tar.gz '' *.tar.gz
           rename -- .tar.gz.sig '.sig' *.tar.gz.sig
       - name: Generate Token
-        uses: tibdex/github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: generate-token
         with:
-          app_id: ${{ secrets.app_id }}
-          private_key: ${{ secrets.app_private_key }}
+          app-id: ${{ secrets.app_id }}
+          private-key: ${{ secrets.app_private_key }}
       - name: "Get current date"
         run: |
           echo "builddate=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
