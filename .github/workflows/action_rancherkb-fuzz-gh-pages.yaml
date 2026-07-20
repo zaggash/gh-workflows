@@ -68,7 +68,7 @@ jobs:
         run: go run main.go
 
       - name: Prepare Build env
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: 3.x
 
@@ -157,7 +157,7 @@ jobs:
           pattern: Kbs
 
       - name: Prepare node env
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: 3.x
       - run: |
